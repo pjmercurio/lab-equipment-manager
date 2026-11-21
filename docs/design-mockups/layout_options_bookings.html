@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #e9e5db; margin: 0; padding: 24px 12px; color: #1a1a1a; }
+  .grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+  .phone { width: 350px; background: #f6f3ec; border-radius: 14px; padding: 24px 20px; box-sizing: border-box; box-shadow: 0 1px 6px rgba(0,0,0,.15); }
+  .tag { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+  h1 { margin: 0 0 14px; font-size: 26px; }
+  .btn { display: block; text-align: center; background: #2563eb; color: #fff; border-radius: 999px; padding: 14px; font-size: 15px; font-weight: 600; margin-top: 12px; }
+  .emoji { margin-left: 8px; font-size: 1.2em; vertical-align: -0.05em; }
+
+  .rows { margin-bottom: 20px; font-size: 14px; }
+  .row { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid #e4dfd2; }
+  .row:last-child { border-bottom: 1px solid #e4dfd2; }
+  .ico { width: 20px; text-align: center; flex-shrink: 0; }
+  .k { color: #777; width: 92px; flex-shrink: 0; }
+  .v { font-weight: 600; flex: 1; }
+  .v .line { display: block; }
+  .v .line + .line { margin-top: 4px; }
+  .t { color: #2563eb; }
+  .ttl { font-weight: 500; color: #444; }
+  .now { color: #dc2626; font-weight: 700; }
+
+  /* option 3: section dividers */
+  .sec { padding: 10px 0 4px; font-size: 11px; font-weight: 700; color: #8a8576; text-transform: uppercase; letter-spacing: .06em; border-top: 1px solid #e4dfd2; }
+  .sec + .row { border-top: none; }
+
+  /* option 4: status-first */
+  .status { display: flex; align-items: center; gap: 8px; background: #fde8e8; color: #b91c1c; border-radius: 10px; padding: 10px 14px; font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #dc2626; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="grid">
+
+  <!-- 1: booking day as the row label -->
+  <div class="phone">
+    <div class="tag">1 · Day as label</div>
+    <h1>Epifluorescent Microscope</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">📅</span><span class="k">Today</span><span class="v">
+        <span class="line"><span class="t">2:00 – 4:00 PM <span class="now">(Now)</span></span> <span class="ttl">Maria</span></span>
+        <span class="line"><span class="t">5:00 – 6:00 PM</span> <span class="ttl">Paul</span></span></span></div>
+      <div class="row"><span class="ico">📅</span><span class="k">Tomorrow</span><span class="v">
+        <span class="line"><span class="t">9:00 – 10:30 AM</span> <span class="ttl">Alex</span></span></span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+    <div class="btn">View Calendar<span class="emoji">📅</span></div>
+  </div>
+
+  <!-- 2: single Bookings row, day groups inside -->
+  <div class="phone">
+    <div class="tag">2 · One Bookings row</div>
+    <h1>Epifluorescent Microscope</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">📅</span><span class="k">Bookings</span><span class="v">
+        <span class="line" style="font-size:11px;color:#8a8576;text-transform:uppercase;letter-spacing:.05em">Today</span>
+        <span class="line"><span class="t">2:00 – 4:00 PM <span class="now">(Now)</span></span> <span class="ttl">Maria</span></span>
+        <span class="line"><span class="t">5:00 – 6:00 PM</span> <span class="ttl">Paul</span></span>
+        <span class="line" style="margin-top:10px;font-size:11px;color:#8a8576;text-transform:uppercase;letter-spacing:.05em">Tomorrow</span>
+        <span class="line"><span class="t">9:00 – 10:30 AM</span> <span class="ttl">Alex</span></span></span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+    <div class="btn">View Calendar<span class="emoji">📅</span></div>
+  </div>
+
+  <!-- 3: section dividers, one row per booking -->
+  <div class="phone">
+    <div class="tag">3 · Section dividers</div>
+    <h1>Epifluorescent Microscope</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="sec">Today</div>
+      <div class="row"><span class="ico">📅</span><span class="k t" style="color:#2563eb;font-weight:600;width:auto;flex:1">2:00 – 4:00 PM <span class="now">(Now)</span></span><span class="v ttl" style="flex:0 0 auto">Maria</span></div>
+      <div class="row"><span class="ico">📅</span><span class="k t" style="color:#2563eb;font-weight:600;width:auto;flex:1">5:00 – 6:00 PM</span><span class="v ttl" style="flex:0 0 auto">Paul</span></div>
+      <div class="sec">Tomorrow</div>
+      <div class="row"><span class="ico">📅</span><span class="k t" style="color:#2563eb;font-weight:600;width:auto;flex:1">9:00 – 10:30 AM</span><span class="v ttl" style="flex:0 0 auto">Alex</span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+    <div class="btn">View Calendar<span class="emoji">📅</span></div>
+  </div>
+
+  <!-- 4: status first -->
+  <div class="phone">
+    <div class="tag">4 · Status first</div>
+    <h1>Epifluorescent Microscope</h1>
+    <div class="status"><span class="dot"></span>In use now · until 4:00 PM</div>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">📅</span><span class="k">Up next</span><span class="v">
+        <span class="line"><span class="t">Today 5:00 – 6:00 PM</span> <span class="ttl">Paul</span></span>
+        <span class="line"><span class="t">Tomorrow 9:00 – 10:30 AM</span> <span class="ttl">Alex</span></span></span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+    <div class="btn">View Calendar<span class="emoji">📅</span></div>
+  </div>
+
+</div>
+</body>
+</html>

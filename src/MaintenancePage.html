@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 480px;
+      margin: 48px auto;
+      padding: 0 20px;
+      color: #1a1a1a;
+      background: #f6f3ec;
+    }
+    h1 { margin-bottom: 28px; }
+    .empty-state { color: #666; font-size: 15px; }
+    .item-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .item-row input[type=checkbox] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .item-row .item-info { flex: 1; }
+    .item-row .item-name { font-weight: 600; font-size: 15px; cursor: pointer; }
+    .item-row .item-meta { color: #666; font-size: 12px; margin-top: 2px; }
+    .item-row .item-procedure { font-size: 13px; margin-top: 4px; }
+    .item-row .item-procedure a { color: #2563eb; }
+    .item-row.highlighted {
+      background: #fef9c3;
+      margin: 0 -20px;
+      padding: 14px 20px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    button {
+      flex: 1;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled { cursor: not-allowed; }
+    #resolveBtn {
+      background: #2563eb;
+      color: white;
+    }
+    #resolveBtn:disabled { background: #93b4f0; }
+    #cancelBtn {
+      background: white;
+      color: #1a1a1a;
+      border: 1px solid #ccc;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #16a34a;
+      display: none;
+    }
+    /* pressed feedback (mobile + desktop) */
+    button:not(:disabled):active { filter: brightness(0.85); }
+    .tile:active { background: #ebe6d9; }
+    button, .tile { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body>
+  <h1>CRE Lab Maintenance Due</h1>
+
+  <? if (items.length === 0) { ?>
+  <div class="empty-state">Nothing due for maintenance right now.</div>
+  <? } else { ?>
+  <div id="itemList">
+    <? for (var i = 0; i < items.length; i++) { ?>
+    <? var isHighlighted = items[i].equipment == highlightName; ?>
+    <div class="item-row<?= isHighlighted ? ' highlighted' : '' ?>">
+      <input type="checkbox" class="item-checkbox" data-equipment="<?= items[i].equipment ?>" id="item-<?= i ?>">
+      <div class="item-info">
+        <label class="item-name" for="item-<?= i ?>"><?= items[i].equipment ?></label>
+        <div class="item-meta">
+          <? if (items[i].daysOverdue === null) { ?>
+          No recorded maintenance date on file
+          <? } else if (items[i].daysOverdue > 0) { ?>
+          <?= items[i].daysOverdue ?> day<?= items[i].daysOverdue === 1 ? '' : 's' ?> past its maintenance interval
+          <? } else { ?>
+          Due for scheduled maintenance
+          <? } ?>
+        </div>
+        <? if (items[i].procedure) { ?>
+        <div class="item-procedure">
+          <? if (items[i].procedure.indexOf('http') === 0) { ?>
+          <a href="<?= items[i].procedure ?>" target="_blank">View Procedure</a>
+          <? } else { ?>
+          <?= items[i].procedure ?>
+          <? } ?>
+        </div>
+        <? } ?>
+      </div>
+    </div>
+    <? } ?>
+  </div>
+
+  <div class="actions">
+    <button type="button" id="cancelBtn">Cancel</button>
+    <button type="button" id="resolveBtn" disabled>Mark Complete</button>
+  </div>
+
+  <div id="result"></div>
+  <? } ?>
+
+  <script>
+    // iOS Safari only applies :active styles when a touch listener exists
+    document.addEventListener('touchstart', function () {}, true);
+    var highlighted = document.querySelector('.item-row.highlighted');
+    if (highlighted) {
+      highlighted.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    var checkboxes = Array.prototype.slice.call(document.querySelectorAll('.item-checkbox'));
+    var resolveBtn = document.getElementById('resolveBtn');
+    var cancelBtn = document.getElementById('cancelBtn');
+    var result = document.getElementById('result');
+
+    function updateResolveState_() {
+      var anyChecked = checkboxes.some(function (cb) { return cb.checked; });
+      resolveBtn.disabled = !anyChecked;
+    }
+
+    checkboxes.forEach(function (cb) {
+      cb.addEventListener('change', updateResolveState_);
+    });
+
+    cancelBtn.addEventListener('click', function () {
+      checkboxes.forEach(function (cb) { cb.checked = false; });
+      updateResolveState_();
+    });
+
+    resolveBtn.addEventListener('click', function () {
+      var selected = checkboxes
+        .filter(function (cb) { return cb.checked; })
+        .map(function (cb) { return cb.dataset.equipment; });
+      if (selected.length === 0) return;
+
+      resolveBtn.disabled = true;
+      cancelBtn.disabled = true;
+      resolveBtn.textContent = 'Resolving…';
+
+      google.script.run
+        .withSuccessHandler(function (msg) {
+          checkboxes.forEach(function (cb) {
+            if (cb.checked) {
+              cb.closest('.item-row').remove();
+            }
+          });
+          checkboxes = checkboxes.filter(function (cb) { return !cb.checked; });
+          result.textContent = msg;
+          result.style.display = 'block';
+          resolveBtn.disabled = true;
+          cancelBtn.disabled = false;
+          resolveBtn.textContent = 'Mark Complete';
+
+          if (checkboxes.length === 0) {
+            document.getElementById('itemList').innerHTML = '<div class="empty-state">Nothing due for maintenance right now.</div>';
+            document.querySelector('.actions').style.display = 'none';
+          }
+        })
+        .withFailureHandler(function (err) {
+          resolveBtn.disabled = false;
+          cancelBtn.disabled = false;
+          resolveBtn.textContent = 'Mark Complete';
+          alert('Error: ' + err.message);
+        })
+        .resolveMaintenanceItems(selected);
+    });
+  </script>
+</body>
+</html>

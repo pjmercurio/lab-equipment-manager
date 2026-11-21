@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 420px;
+      margin: 48px auto;
+      padding: 0 20px;
+      color: #1a1a1a;
+      background: #f6f3ec;
+    }
+    h1 { margin-bottom: 4px; }
+    h1.has-info { margin-bottom: 14px; }
+    .status { margin-bottom: 28px; font-size: 15px; font-weight: 600; }
+    .info-rows { margin-bottom: 16px; font-size: 14px; }
+    .info-row { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid #e4dfd2; }
+    .info-row:last-child { border-bottom: 1px solid #e4dfd2; }
+    .info-row .ico { width: 20px; text-align: center; }
+    .info-row .k { color: #777; min-width: 92px; }
+    .info-row .v { font-weight: 600; }
+    .info-row .v.wrap { flex: 1; line-height: 1.4; }
+    .status.available { color: #16a34a; }
+    .status.checked-out { color: #dc2626; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+    input[type=text], select {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+    }
+    .date-field {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .date-field input[type=date], .date-field input[type=datetime-local] {
+      /* width:1px + min-width:100% works around an iOS Safari bug where
+         type=date ignores an inherited width:100% and overflows the
+         viewport based on its locale-formatted placeholder content. */
+      width: 1px;
+      min-width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 12px 40px 12px 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+      margin-bottom: 0;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .date-field .date-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #666;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      font-family: inherit;
+      line-height: 1.4;
+      min-height: 53px;
+      font-size: 15px;
+      font-weight: 600;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 14px;
+    }
+    button:disabled { background: #93b4f0; }
+    .return-location { font-size: 13px; color: #666; margin-bottom: 12px; }
+    .checking-out-as { font-size: 15px; font-weight: 600; margin-bottom: 20px; }
+    .warning-box {
+      background: #fef3c7;
+      border: 1px solid #f5d68a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .warning-box p { margin: 0 0 16px; font-size: 14px; color: #92400e; font-weight: 600; }
+    .warning-box button {
+      background: #dc2626;
+    }
+    .warning-box button:disabled {
+      background: #f0a3a3;
+    }
+    .warning-box .secondary-btn {
+      display: block;
+      text-align: center;
+      background: white;
+      color: #1a1a1a;
+      border: 1px solid #ccc;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-top: 10px;
+      box-sizing: border-box;
+    }
+    .tiles { display: flex; gap: 10px; margin-top: 12px; margin-bottom: 4px; }
+    .tile {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border: 1px solid #e4dfd2;
+      border-radius: 14px;
+      padding: 14px 4px 12px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: #1e40af;
+      box-sizing: border-box;
+    }
+    .tile .tile-emoji { display: block; margin-bottom: 6px; font-size: 26px; line-height: 1.1; }
+    .issue-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .issue-row input[type=checkbox] {
+      width: 18px;
+      height: 18px;
+    }
+    .issue-row label {
+      margin-bottom: 0;
+      font-weight: 500;
+    }
+    textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      box-sizing: border-box;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+      resize: vertical;
+      min-height: 90px;
+    }
+    #checkoutForm, #statusLine {
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      opacity: 1;
+    }
+    #checkoutForm.fading-out, #statusLine.fading-out {
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+    }
+    #result {
+      margin-top: 24px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      opacity: 0;
+      transform: translateY(6px) scale(0.96);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    #result.visible { display: flex; }
+    #result.visible.shown {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    #resultIcon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: scale(0.7);
+      opacity: 0;
+      transition: opacity 0.3s ease 0.1s, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+    }
+    #result.shown #resultIcon {
+      opacity: 1;
+      transform: scale(1);
+    }
+    #result.success #resultIcon { background: #dcfce7; }
+    #result.error #resultIcon { background: #fee2e2; }
+    #resultIcon svg path,
+    #resultIcon svg polyline,
+    #resultIcon svg line {
+      stroke-dasharray: 40;
+      stroke-dashoffset: 40;
+      transition: stroke-dashoffset 0.4s ease 0.35s;
+    }
+    #result.shown #resultIcon svg path,
+    #result.shown #resultIcon svg polyline,
+    #result.shown #resultIcon svg line {
+      stroke-dashoffset: 0;
+    }
+    #resultText {
+      font-weight: 600;
+      font-size: 15px;
+      opacity: 0;
+      transition: opacity 0.3s ease 0.3s;
+    }
+    #result.shown #resultText { opacity: 1; }
+    #result.success #resultText { color: #16a34a; }
+    #result.error #resultText { color: #dc2626; }
+    .btn-emoji { margin-left: 8px; font-size: 1.2em; vertical-align: -0.05em; }
+    .complete-training-btn {
+      margin-top: 12px;
+      width: 100%;
+      display: block;
+      text-align: center;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+      cursor: pointer;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .complete-training-btn:disabled { background: #86d6a4; cursor: default; }
+    .complete-training-btn.fading-out { opacity: 0; transform: translateY(-6px); pointer-events: none; }
+    .complete-training-error { color: #dc2626; font-size: 13px; text-align: center; margin: -8px 0 16px; }
+    .tu-empty { color: #999; font-weight: 500; }
+    .tc-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+      z-index: 30;
+    }
+    .tc-overlay.visible { display: flex; }
+    .tc-modal { background: #fff; border-radius: 10px; padding: 20px; max-width: 340px; width: 100%; box-sizing: border-box; }
+    .tc-text { font-size: 15px; line-height: 1.45; margin-bottom: 16px; }
+    .tc-actions { display: flex; justify-content: flex-end; gap: 4px; margin-right: -8px; margin-bottom: -8px; }
+    .tc-modal button { width: auto; min-height: 0; margin: 0; padding: 10px 12px; font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1.2; background: none; border: none; border-radius: 6px; color: #2563eb; cursor: pointer; }
+    .tc-modal button:not(:disabled):active { filter: none; background: rgba(37, 99, 235, 0.12); }
+    .tc-modal .tc-cancel { color: #555; font-weight: 400; }
+    .tc-modal .tc-cancel:not(:disabled):active { background: rgba(0, 0, 0, 0.08); }
+    /* pressed feedback (mobile + desktop) */
+    button:not(:disabled):active { filter: brightness(0.85); }
+    .tile:active { background: #ebe6d9; }
+    button, .tile { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body>
+  <? var showLast = action == 'checkout' && lastCheckedOutBy; ?>
+  <h1 class="<?= (showLast || trainedUsers || canCompleteTraining) ? 'has-info' : '' ?>"><?= itemName ?></h1>
+  <? if (showLast || trainedUsers || canCompleteTraining) { ?>
+  <div class="info-rows">
+    <? if (showLast) { ?>
+    <div class="info-row"><span class="ico">🕒</span><span class="k">Last checked out by</span><span class="v"><?= lastCheckedOutBy ?></span></div>
+    <? } ?>
+    <? if (trainedUsers || canCompleteTraining) { ?>
+    <div class="info-row"><span class="ico">🎓</span><span class="k">Trained users</span><span class="v wrap"><span id="tuText"<?!= trainedUsers ? '' : ' class="tu-empty"' ?>><?= trainedUsers || 'No one yet' ?></span></span></div>
+    <? } ?>
+  </div>
+  <? } ?>
+  <div id="statusLine" class="status <?= action == 'checkin' ? 'checked-out' : 'available' ?>"><?= statusText ?><?= expectedReturnText ? ' — Expected return by: ' + expectedReturnText : '' ?></div>
+
+  <form id="checkoutForm">
+    <input type="hidden" id="itemName" value="<?= itemName ?>">
+    <input type="hidden" id="action" value="<?= action ?>">
+    <? if (action == 'checkout') { ?>
+    <label for="name">Your name</label>
+    <select id="name" required>
+      <option value="" disabled selected>Select your name</option>
+      <? for (var i = 0; i < userNames.length; i++) { ?>
+      <option value="<?= userNames[i] ?>"><?= userNames[i] ?></option>
+      <? } ?>
+    </select>
+    <input type="hidden" id="matchedName" value="<?= matchedName ?>">
+    <label for="expectedReturn">Expected Return</label>
+    <div class="date-field">
+      <input type="datetime-local" id="expectedReturn" required>
+      <svg class="date-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+    </div>
+    <? } ?>
+    <? if (returnLocationText) { ?>
+    <div class="return-location"><?= returnLocationText ?></div>
+    <? } ?>
+    <? if (flaggedWarning) { ?>
+    <div class="warning-box">
+      <p>⚠️ Warning! This item has been flagged with the following issue(s): "<?= openIssuesText ?>"</p>
+      <p>Are you sure you want to check it out?</p>
+      <button type="submit" id="submitBtn">Check Out Anyway</button>
+    </div>
+    <? } else { ?>
+    <button type="submit" id="submitBtn"><?= buttonLabel ?></button>
+    <? if (action == 'checkin') { ?>
+    <div class="issue-row">
+      <input type="checkbox" id="reportIssue">
+      <label for="reportIssue">Report an Issue</label>
+    </div>
+    <textarea id="issueNotes" style="display:none;" placeholder="Describe the issue…"></textarea>
+    <img id="issueGif" src="" style="display:none; width:100%; border-radius:6px; margin-top:10px;">
+    <? } ?>
+    <? } ?>
+  </form>
+
+  <div id="result">
+    <div id="resultIcon"></div>
+    <div id="resultText"></div>
+  </div>
+
+  <? if (action == 'checkout' && (sopLink || manualLink)) { ?>
+  <div class="tiles">
+    <? if (sopLink) { ?>
+    <a class="tile" href="<?= sopLink ?>" target="_blank"><span class="tile-emoji">📋</span>View SOP</a>
+    <? } ?>
+    <? if (manualLink) { ?>
+    <a class="tile" href="<?= manualLink ?>" target="_blank"><span class="tile-emoji">📖</span>View Manual</a>
+    <? } ?>
+  </div>
+  <? } ?>
+
+  <? if (canCompleteTraining) { ?>
+  <button type="button" class="complete-training-btn" id="completeTrainingBtn">Complete Training<span class="btn-emoji">🎓</span></button>
+  <? } ?>
+
+  <div class="tc-overlay" id="tcOverlay">
+    <div class="tc-modal">
+      <div class="tc-text">I hereby confirm I've completed all the required steps for this training.</div>
+      <div class="tc-actions">
+        <button type="button" class="tc-cancel" id="tcCancel">Cancel</button>
+        <button type="button" class="tc-confirm" id="tcConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // iOS Safari only applies :active styles when a touch listener exists
+    document.addEventListener('touchstart', function () {}, true);
+    (function () {
+      var trainingBtn = document.getElementById('completeTrainingBtn');
+      if (!trainingBtn) { return; }
+      var trainingLabel = trainingBtn.innerHTML;
+
+      var tcOverlay = document.getElementById('tcOverlay');
+      trainingBtn.addEventListener('click', function () { tcOverlay.classList.add('visible'); });
+      document.getElementById('tcCancel').addEventListener('click', function () { tcOverlay.classList.remove('visible'); });
+      tcOverlay.addEventListener('click', function (e) { if (e.target === tcOverlay) { tcOverlay.classList.remove('visible'); } });
+
+      document.getElementById('tcConfirm').addEventListener('click', function () {
+        tcOverlay.classList.remove('visible');
+        trainingBtn.disabled = true;
+        trainingBtn.textContent = 'Saving…';
+        var oldErr = document.getElementById('completeTrainingError');
+        if (oldErr) { oldErr.parentNode.removeChild(oldErr); }
+
+        google.script.run
+          .withSuccessHandler(function (trainedUsers) {
+            var textEl = document.getElementById('tuText');
+            if (textEl) {
+              textEl.textContent = trainedUsers;
+              textEl.classList.remove('tu-empty');
+            }
+            trainingBtn.textContent = '✓ Training recorded';
+            setTimeout(function () {
+              trainingBtn.classList.add('fading-out');
+              setTimeout(function () { trainingBtn.style.display = 'none'; }, 250);
+            }, 1200);
+          })
+          .withFailureHandler(function (err) {
+            trainingBtn.disabled = false;
+            trainingBtn.innerHTML = trainingLabel;
+            var msg = document.createElement('div');
+            msg.id = 'completeTrainingError';
+            msg.className = 'complete-training-error';
+            msg.textContent = err.message;
+            trainingBtn.parentNode.insertBefore(msg, trainingBtn.nextSibling);
+          })
+          .completeTraining(<?!= JSON.stringify(itemName) ?>);
+      });
+    })();
+
+    var LAST_NAME_KEY = 'labCheckoutLastName';
+
+    (function setDefaultName_() {
+      var nameField = document.getElementById('name');
+      if (!nameField) return;
+
+      var matchedNameField = document.getElementById('matchedName');
+      var matchedName = matchedNameField ? matchedNameField.value : '';
+      var candidateName = matchedName || localStorage.getItem(LAST_NAME_KEY) || '';
+
+      if (candidateName) {
+        for (var i = 0; i < nameField.options.length; i++) {
+          if (nameField.options[i].value === candidateName) {
+            nameField.value = candidateName;
+            break;
+          }
+        }
+      }
+    })();
+
+    var reportIssueCheckbox = document.getElementById('reportIssue');
+    var issueNotesField = document.getElementById('issueNotes');
+    var checkinSubmitBtn = document.getElementById('submitBtn');
+    let GIPHY_API_KEY = 'YOUR_GIPHY_API_KEY'; // get a free key at developers.giphy.com
+    let issueGifShown = false;
+    
+    function updateIssueGate_() {
+      if (!reportIssueCheckbox) return;
+      issueNotesField.style.display = reportIssueCheckbox.checked ? 'block' : 'none';
+
+      var gif = document.getElementById('issueGif');
+      if (reportIssueCheckbox.checked) {
+        gif.style.display = 'block';
+        if (!issueGifShown) {
+          issueGifShown = true;
+          fetch('https://api.giphy.com/v1/gifs/search?api_key=' + GIPHY_API_KEY + '&q=animal+surprise&limit=8&rating=g')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (data && data.data && data.data.length > 0) {
+                var pick = data.data[Math.floor(Math.random() * data.data.length)];
+                gif.src = pick.images.fixed_height.url;
+              }
+            })
+            .catch(function () { gif.src = 'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2YydnMwc2RhbjJ1azZ6ams2MzJzMHVkb2d1MWw2NTJ6YmExdTMwNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jivGITd768psP80B2i/giphy.gif'; });
+        }
+      } else {
+        gif.style.display = 'none';
+      }
+
+      var blocked = reportIssueCheckbox.checked && issueNotesField.value.trim() === '';
+      checkinSubmitBtn.disabled = blocked;
+    }
+
+    if (reportIssueCheckbox) {
+      reportIssueCheckbox.addEventListener('change', updateIssueGate_);
+      issueNotesField.addEventListener('input', updateIssueGate_);
+      updateIssueGate_();
+    }
+
+    document.getElementById('checkoutForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var nameField = document.getElementById('name');
+      var name = nameField ? nameField.value.trim() : '';
+      if (nameField && !name) return;
+
+      var btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      google.script.run
+        .withSuccessHandler(function (msg) {
+          if (name) {
+            localStorage.setItem(LAST_NAME_KEY, name);
+          }
+          var form = document.getElementById('checkoutForm');
+          var statusLine = document.getElementById('statusLine');
+          form.classList.add('fading-out');
+          if (statusLine) statusLine.classList.add('fading-out');
+          setTimeout(function () {
+            form.style.display = 'none';
+            if (statusLine) statusLine.style.display = 'none';
+          }, 250);
+          showResult_(true, msg);
+        })
+        .withFailureHandler(function (err) {
+          showResult_(false, 'Error: ' + err.message);
+          btn.disabled = false;
+          btn.textContent = <?= flaggedWarning ? "'Check Out Anyway'" : "'" + buttonLabel + "'" ?>;
+        })
+        .processCheckout(
+          document.getElementById('itemName').value,
+          name,
+          document.getElementById('action').value,
+          reportIssueCheckbox ? reportIssueCheckbox.checked : false,
+          issueNotesField ? issueNotesField.value : '',
+          document.getElementById('expectedReturn') ? document.getElementById('expectedReturn').value : ''
+        );
+    });
+
+    function showResult_(success, message) {
+      var result = document.getElementById('result');
+      var icon = document.getElementById('resultIcon');
+      var text = document.getElementById('resultText');
+
+      result.classList.remove('shown');
+      result.className = success ? 'success visible' : 'error visible';
+      text.textContent = message;
+      icon.innerHTML = success
+        ? '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"></polyline></svg>'
+        : '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+
+      // Force a reflow so the browser registers the reset state before we
+      // add 'shown', otherwise the transition won't play.
+      void result.offsetWidth;
+      requestAnimationFrame(function () {
+        result.classList.add('shown');
+      });
+    }
+  </script>
+</body>
+</html>

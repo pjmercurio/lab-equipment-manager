@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 480px;
+      margin: 48px auto;
+      padding: 0 20px;
+      color: #1a1a1a;
+      background: #f6f3ec;
+    }
+    h1 { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+    select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+    }
+
+    .tabs {
+      display: flex;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      background: white;
+      color: #1a1a1a;
+      border: none;
+      cursor: pointer;
+    }
+    .tab-btn + .tab-btn { border-left: 1px solid #ccc; }
+    .tab-btn.active { background: #2563eb; color: white; }
+
+    .date-wrap { position: relative; margin-bottom: 20px; }
+    .date-wrap input[type=datetime-local] {
+      width: 1px;
+      min-width: 100%;
+      max-width: 100%;
+      padding: 12px 40px 12px 12px;
+      font-size: 16px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .date-wrap .cal-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 18px;
+      height: 18px;
+    }
+
+    #itemList { margin-bottom: 8px; }
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .item-row input[type=checkbox] {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .item-row input[type=checkbox]:disabled { cursor: not-allowed; }
+    .item-row label {
+      margin: 0;
+      font-weight: 500;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .item-row.disabled label { color: #999; cursor: not-allowed; }
+    .item-row .checked-out-by { color: #999; font-weight: 400; }
+    .flag-icon { cursor: pointer; margin-left: 4px; }
+
+    .empty-state { color: #666; font-size: 15px; padding: 20px 0; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+      z-index: 10;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 360px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .modal-title { font-weight: 700; font-size: 16px; margin-bottom: 10px; }
+    .modal-body { font-size: 14px; color: #1a1a1a; margin-bottom: 18px; white-space: pre-wrap; }
+    .modal button {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      background: white;
+      color: #1a1a1a;
+      border: 1px solid #ccc;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    button#submitBtn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      margin-top: 16px;
+      cursor: pointer;
+    }
+    button#submitBtn:disabled { background: #93b4f0; cursor: not-allowed; }
+
+    #result {
+      margin-top: 20px;
+      font-weight: 600;
+      font-size: 15px;
+      display: none;
+    }
+    #result.success { color: #16a34a; display: block; }
+    #result.error { color: #dc2626; display: block; }
+    /* pressed feedback (mobile + desktop) */
+    button:not(:disabled):active { filter: brightness(0.85); }
+    .tile:active { background: #ebe6d9; }
+    button, .tile { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body>
+  <h1><?= heading ?></h1>
+
+  <div class="tabs" id="tabs" style="display:none;">
+    <button type="button" class="tab-btn active" id="tabCheckout">Check Out</button>
+    <button type="button" class="tab-btn" id="tabCheckin">Check In</button>
+  </div>
+
+  <label for="name">Your name</label>
+  <select id="name" required>
+    <option value="" disabled selected>Select your name</option>
+    <? for (var i = 0; i < userNames.length; i++) { ?>
+    <option value="<?= userNames[i] ?>"><?= userNames[i] ?></option>
+    <? } ?>
+  </select>
+
+  <div id="expectedReturnRow">
+    <label for="expectedReturn">Expected return</label>
+    <div class="date-wrap">
+      <input type="datetime-local" id="expectedReturn">
+      <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+    </div>
+  </div>
+
+  <div id="itemList"></div>
+
+  <button type="button" id="submitBtn" disabled>Check Out Selected</button>
+
+  <div id="result"></div>
+
+  <div class="modal-overlay" id="issueModalOverlay">
+    <div class="modal">
+      <div class="modal-title" id="issueModalTitle"></div>
+      <div class="modal-body" id="issueModalBody"></div>
+      <button type="button" id="issueModalCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // iOS Safari only applies :active styles when a touch listener exists
+    document.addEventListener('touchstart', function () {}, true);
+    var LAST_NAME_KEY = 'labCheckoutLastName';
+    var items = <?!= JSON.stringify(items) ?>; // [{equipment, checkedOut, checkedOutBy}]
+    var matchedName = <?!= JSON.stringify(matchedName) ?>;
+    var activeTab = 'checkout';
+
+    var nameField = document.getElementById('name');
+    var tabs = document.getElementById('tabs');
+    var tabCheckout = document.getElementById('tabCheckout');
+    var tabCheckin = document.getElementById('tabCheckin');
+    var itemListEl = document.getElementById('itemList');
+    var expectedReturnRow = document.getElementById('expectedReturnRow');
+    var expectedReturnField = document.getElementById('expectedReturn');
+    var submitBtn = document.getElementById('submitBtn');
+    var result = document.getElementById('result');
+
+    (function setDefaultName_() {
+      var candidateName = matchedName || localStorage.getItem(LAST_NAME_KEY) || '';
+      if (!candidateName) return;
+      for (var i = 0; i < nameField.options.length; i++) {
+        if (nameField.options[i].value === candidateName) {
+          nameField.value = candidateName;
+          break;
+        }
+      }
+    })();
+
+    function hasCheckedOutItems_() {
+      return items.some(function (it) { return it.checkedOut; });
+    }
+
+    function renderTabs_() {
+      if (hasCheckedOutItems_()) {
+        tabs.style.display = 'flex';
+      } else {
+        tabs.style.display = 'none';
+        if (activeTab === 'checkin') {
+          activeTab = 'checkout';
+        }
+      }
+      tabCheckout.classList.toggle('active', activeTab === 'checkout');
+      tabCheckin.classList.toggle('active', activeTab === 'checkin');
+    }
+
+    function renderList_() {
+      itemListEl.innerHTML = '';
+      var visibleItems = activeTab === 'checkin'
+        ? items.filter(function (it) { return it.checkedOut; })
+        : items;
+
+      if (visibleItems.length === 0) {
+        var empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = activeTab === 'checkin' ? 'No items currently checked out.' : 'No items found.';
+        itemListEl.appendChild(empty);
+      } else {
+        visibleItems.forEach(function (it, idx) {
+          var disabled = activeTab === 'checkout' && it.checkedOut;
+
+          var row = document.createElement('div');
+          row.className = 'item-row' + (disabled ? ' disabled' : '');
+
+          var checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'item-checkbox';
+          checkbox.id = 'item-' + activeTab + '-' + idx;
+          checkbox.dataset.equipment = it.equipment;
+          checkbox.disabled = disabled;
+          checkbox.addEventListener('change', updateSubmitState_);
+
+          var label = document.createElement('label');
+          label.setAttribute('for', checkbox.id);
+          label.appendChild(document.createTextNode(it.equipment));
+          if (disabled) {
+            var suffix = document.createElement('span');
+            suffix.className = 'checked-out-by';
+            suffix.textContent = ' (checked out by ' + (it.checkedOutBy || 'Unknown') + ')';
+            label.appendChild(suffix);
+          }
+          if (it.flagged) {
+            var flagIcon = document.createElement('span');
+            flagIcon.className = 'flag-icon';
+            flagIcon.textContent = '⚠️';
+            flagIcon.title = 'Reported issue — tap for details';
+            flagIcon.addEventListener('click', function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              showIssueModal_(it.equipment, it.issueDetails);
+            });
+            label.appendChild(document.createTextNode(' '));
+            label.appendChild(flagIcon);
+          }
+
+          row.appendChild(checkbox);
+          row.appendChild(label);
+          itemListEl.appendChild(row);
+        });
+      }
+
+      expectedReturnRow.style.display = activeTab === 'checkout' ? 'block' : 'none';
+      submitBtn.textContent = activeTab === 'checkout' ? 'Check Out Selected' : 'Check In Selected';
+      updateSubmitState_();
+    }
+
+    function updateSubmitState_() {
+      var name = nameField.value.trim();
+      var anyChecked = Array.prototype.slice.call(document.querySelectorAll('.item-checkbox'))
+        .some(function (cb) { return cb.checked; });
+      var hasReturn = activeTab !== 'checkout' || !!expectedReturnField.value;
+      submitBtn.disabled = !(name && anyChecked && hasReturn);
+    }
+
+    nameField.addEventListener('change', updateSubmitState_);
+    expectedReturnField.addEventListener('input', updateSubmitState_);
+    expectedReturnField.addEventListener('change', updateSubmitState_);
+
+    tabCheckout.addEventListener('click', function () {
+      activeTab = 'checkout';
+      renderTabs_();
+      renderList_();
+    });
+    tabCheckin.addEventListener('click', function () {
+      activeTab = 'checkin';
+      renderTabs_();
+      renderList_();
+    });
+
+    submitBtn.addEventListener('click', function () {
+      var name = nameField.value.trim();
+      var selected = Array.prototype.slice.call(document.querySelectorAll('.item-checkbox'))
+        .filter(function (cb) { return cb.checked; })
+        .map(function (cb) { return cb.dataset.equipment; });
+
+      if (!name || selected.length === 0) return;
+
+      var action = activeTab;
+      var expectedReturn = action === 'checkout' ? expectedReturnField.value : '';
+
+      submitBtn.disabled = true;
+      var submittingLabel = action === 'checkout' ? 'Checking out…' : 'Checking in…';
+      submitBtn.textContent = submittingLabel;
+
+      google.script.run
+        .withSuccessHandler(function (msg) {
+          localStorage.setItem(LAST_NAME_KEY, name);
+
+          items.forEach(function (it) {
+            if (selected.indexOf(it.equipment) !== -1) {
+              it.checkedOut = action === 'checkout';
+              it.checkedOutBy = action === 'checkout' ? name : '';
+            }
+          });
+
+          expectedReturnField.value = '';
+          showResult_(true, msg);
+          renderTabs_();
+          renderList_();
+        })
+        .withFailureHandler(function (err) {
+          showResult_(false, 'Error: ' + err.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = action === 'checkout' ? 'Check Out Selected' : 'Check In Selected';
+        })
+        .processBulkCheckout(selected, name, action, expectedReturn);
+    });
+
+    function showResult_(success, message) {
+      result.className = success ? 'success' : 'error';
+      result.textContent = message;
+    }
+
+    var issueModalOverlay = document.getElementById('issueModalOverlay');
+    var issueModalTitle = document.getElementById('issueModalTitle');
+    var issueModalBody = document.getElementById('issueModalBody');
+    var issueModalCloseBtn = document.getElementById('issueModalCloseBtn');
+
+    function showIssueModal_(equipmentName, details) {
+      issueModalTitle.textContent = equipmentName;
+      issueModalBody.textContent = details || '(no details provided)';
+      issueModalOverlay.classList.add('visible');
+    }
+
+    function closeIssueModal_() {
+      issueModalOverlay.classList.remove('visible');
+    }
+
+    issueModalCloseBtn.addEventListener('click', closeIssueModal_);
+    issueModalOverlay.addEventListener('click', function (e) {
+      if (e.target === issueModalOverlay) {
+        closeIssueModal_();
+      }
+    });
+
+    renderTabs_();
+    renderList_();
+  </script>
+</body>
+</html>

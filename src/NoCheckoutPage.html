@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 420px;
+      margin: 48px auto;
+      padding: 0 20px;
+      color: #1a1a1a;
+      background: #f6f3ec;
+    }
+    h1 { margin-bottom: 28px; }
+    h1.has-info { margin-bottom: 14px; }
+    .info-rows { margin-bottom: 24px; font-size: 14px; }
+    .info-row { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid #e4dfd2; }
+    .info-row:last-child { border-bottom: 1px solid #e4dfd2; }
+    .info-row .ico { width: 20px; text-align: center; }
+    .info-row .k { color: #777; min-width: 92px; }
+    .info-row .v { font-weight: 600; }
+    .info-row .v.wrap { flex: 1; line-height: 1.4; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+    select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+    }
+    .sop-link {
+      display: block;
+      text-align: center;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-family: inherit;
+      line-height: 1.4;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+    .tiles { display: flex; gap: 10px; margin-bottom: 16px; }
+    .tile {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border: 1px solid #e4dfd2;
+      border-radius: 14px;
+      padding: 14px 4px 12px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: #1e40af;
+      box-sizing: border-box;
+    }
+    .tile .tile-emoji { display: block; margin-bottom: 6px; font-size: 26px; line-height: 1.1; }
+    .btn-emoji { margin-left: 8px; font-size: 1.2em; vertical-align: -0.05em; }
+    .btn-subtext { margin: -6px 0 16px; text-align: center; font-size: 12px; color: #777; }
+    .info-sec { padding: 10px 0 4px; font-size: 11px; font-weight: 700; color: #8a8576; text-transform: uppercase; letter-spacing: .06em; border-top: 1px solid #e4dfd2; }
+    .info-sec + .info-row { border-top: none; }
+    .info-row .bk-time { flex: 1; font-weight: 600; color: #2563eb; }
+    .info-row .bk-now { color: #dc2626; font-weight: 700; }
+    .info-row .bk-title { font-weight: 500; color: #444; text-align: right; }
+    .info-row .info-fail { flex: 1; color: #666; font-weight: 500; }
+    .info-row .info-fail small { display: block; margin-top: 2px; font-size: 11px; color: #999; font-weight: 400; word-break: break-all; }
+    .report-issue-btn {
+      font-family: inherit;
+      line-height: 1.4;
+      width: 100%;
+      display: block;
+      text-align: center;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+    .report-issue-btn:disabled { background: #f0a3a3; }
+    textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      box-sizing: border-box;
+      margin-top: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+      resize: vertical;
+      min-height: 90px;
+      display: none;
+    }
+    #issueGif { display: none; width: 100%; border-radius: 6px; margin-bottom: 16px; }
+    #result {
+      margin-top: 24px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      opacity: 0;
+      transform: translateY(6px) scale(0.96);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    #result.visible { display: flex; }
+    #result.visible.shown {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    #resultIcon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #dcfce7;
+      transform: scale(0.7);
+      opacity: 0;
+      transition: opacity 0.3s ease 0.1s, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+    }
+    #result.shown #resultIcon { opacity: 1; transform: scale(1); }
+    #resultIcon svg polyline {
+      stroke-dasharray: 40;
+      stroke-dashoffset: 40;
+      transition: stroke-dashoffset 0.4s ease 0.35s;
+    }
+    #result.shown #resultIcon svg polyline { stroke-dashoffset: 0; }
+    #resultText {
+      font-weight: 600;
+      font-size: 15px;
+      color: #16a34a;
+      opacity: 0;
+      transition: opacity 0.3s ease 0.3s;
+    }
+    #result.shown #resultText { opacity: 1; }
+    #issueSection {
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      opacity: 1;
+    }
+    #issueSection.fading-out {
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+    }
+    .complete-training-btn {
+      width: 100%;
+      display: block;
+      text-align: center;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-family: inherit;
+      line-height: 1.4;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+      cursor: pointer;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .complete-training-btn:disabled { background: #86d6a4; cursor: default; }
+    .complete-training-btn.fading-out { opacity: 0; transform: translateY(-6px); pointer-events: none; }
+    .complete-training-error { color: #dc2626; font-size: 13px; text-align: center; margin: -8px 0 16px; }
+    .tu-empty { color: #999; font-weight: 500; }
+    .tc-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+      z-index: 30;
+    }
+    .tc-overlay.visible { display: flex; }
+    .tc-modal { background: #fff; border-radius: 10px; padding: 20px; max-width: 340px; width: 100%; box-sizing: border-box; }
+    .tc-text { font-size: 15px; line-height: 1.45; margin-bottom: 16px; }
+    .tc-actions { display: flex; justify-content: flex-end; gap: 4px; margin-right: -8px; margin-bottom: -8px; }
+    .tc-modal button { width: auto; min-height: 0; margin: 0; padding: 10px 12px; font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1.2; background: none; border: none; border-radius: 6px; color: #2563eb; cursor: pointer; }
+    .tc-modal button:not(:disabled):active { filter: none; background: rgba(37, 99, 235, 0.12); }
+    .tc-modal .tc-cancel { color: #555; font-weight: 400; }
+    .tc-modal .tc-cancel:not(:disabled):active { background: rgba(0, 0, 0, 0.08); }
+    /* pressed feedback (mobile + desktop) */
+    button:not(:disabled):active { filter: brightness(0.85); }
+    .tile:active { background: #ebe6d9; }
+    button, .tile { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body>
+  <? var lastUsedBy = bookings && bookings.ok ? bookings.lastUsedBy : ''; ?>
+  <? var hasBookings = bookings && bookings.ok && (bookings.days.length > 0 || bookings.next); ?>
+  <? var bookingsFailed = bookings && !bookings.ok; ?>
+  <? var showInfo = pointOfContact || lastUsedBy || trainedUsers || canCompleteTraining || hasBookings || bookingsFailed; ?>
+  <h1 class="<?= showInfo ? 'has-info' : '' ?>"><?= itemName ?></h1>
+  <? if (showInfo) { ?>
+  <div class="info-rows">
+    <? if (pointOfContact) { ?>
+    <div class="info-row"><span class="ico">👤</span><span class="k">Contact</span><span class="v"><?= pointOfContact ?></span></div>
+    <? } ?>
+    <? if (lastUsedBy) { ?>
+    <div class="info-row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v"><?= lastUsedBy ?></span></div>
+    <? } ?>
+    <? if (trainedUsers || canCompleteTraining) { ?>
+    <div class="info-row"><span class="ico">🎓</span><span class="k">Trained users</span><span class="v wrap"><span id="tuText"<?!= trainedUsers ? '' : ' class="tu-empty"' ?>><?= trainedUsers || 'No one yet' ?></span></span></div>
+    <? } ?>
+    <? if (hasBookings) { ?>
+    <? var sections = bookings.days.slice();
+       if (bookings.next) { sections.push({ label: 'Next booking', list: [bookings.next] }); } ?>
+    <? for (var s = 0; s < sections.length; s++) { if (sections[s].list.length === 0) continue; ?>
+    <div class="info-sec"><?= sections[s].label ?></div>
+    <? for (var r = 0; r < sections[s].list.length; r++) {
+         var bk = sections[s].list[r];
+         var isNow = bk.time.indexOf(' (Now)') !== -1;
+         var bkTime = bk.time.replace(' (Now)', ''); ?>
+    <div class="info-row"><span class="ico">📅</span><span class="bk-time"><?= bkTime ?><? if (isNow) { ?> <span class="bk-now">(Now)</span><? } ?></span><span class="bk-title"><?= bk.title ?></span></div>
+    <? } } ?>
+    <? } ?>
+    <? if (bookingsFailed) { ?>
+    <div class="info-row"><span class="ico">📅</span><span class="info-fail">Couldn't load bookings right now<small><?= bookings.detail ?></small></span></div>
+    <? } ?>
+  </div>
+  <? } ?>
+
+  <? if (sopLink || manualLink || calendarLink) { ?>
+  <div class="tiles">
+    <? if (sopLink) { ?>
+    <a class="tile" href="<?= sopLink ?>" target="_blank"><span class="tile-emoji">📋</span>View SOP</a>
+    <? } ?>
+    <? if (manualLink) { ?>
+    <a class="tile" href="<?= manualLink ?>" target="_blank"><span class="tile-emoji">📖</span>View Manual</a>
+    <? } ?>
+    <? if (calendarLink) { ?>
+    <a class="tile" href="<?= calendarLink ?>" target="_blank"><span class="tile-emoji">📅</span>View Calendar</a>
+    <? } ?>
+  </div>
+  <? } ?>
+  <? if (calendarLink) { ?>
+  <div class="btn-subtext">(Please make all bookings at least 12 hours in advance)</div>
+  <? } ?>
+  <? if (canCompleteTraining) { ?>
+  <button type="button" class="complete-training-btn" id="completeTrainingBtn">Complete Training<span class="btn-emoji">🎓</span></button>
+  <? } ?>
+  <div id="issueSection">
+    <button type="button" class="report-issue-btn" id="reportIssueBtn">Report an Issue...<span class="btn-emoji">🚩</span></button>
+    <label for="name" id="nameLabel" style="display:none;">Your name</label>
+    <select id="name" style="display:none;">
+      <option value="" disabled selected>Select your name</option>
+      <? for (var i = 0; i < userNames.length; i++) { ?>
+      <option value="<?= userNames[i] ?>"><?= userNames[i] ?></option>
+      <? } ?>
+    </select>
+    <input type="hidden" id="matchedName" value="<?= matchedName ?>">
+    <textarea id="issueNotes" placeholder="Describe the issue…"></textarea>
+    <img id="issueGif" src="">
+  </div>
+
+  <div id="result">
+    <div id="resultIcon"></div>
+    <div id="resultText"></div>
+  </div>
+
+  <div class="tc-overlay" id="tcOverlay">
+    <div class="tc-modal">
+      <div class="tc-text">I hereby confirm I've completed all the required steps for this training.</div>
+      <div class="tc-actions">
+        <button type="button" class="tc-cancel" id="tcCancel">Cancel</button>
+        <button type="button" class="tc-confirm" id="tcConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // iOS Safari only applies :active styles when a touch listener exists
+    document.addEventListener('touchstart', function () {}, true);
+    (function () {
+      var trainingBtn = document.getElementById('completeTrainingBtn');
+      if (!trainingBtn) { return; }
+      var trainingLabel = trainingBtn.innerHTML;
+
+      var tcOverlay = document.getElementById('tcOverlay');
+      trainingBtn.addEventListener('click', function () { tcOverlay.classList.add('visible'); });
+      document.getElementById('tcCancel').addEventListener('click', function () { tcOverlay.classList.remove('visible'); });
+      tcOverlay.addEventListener('click', function (e) { if (e.target === tcOverlay) { tcOverlay.classList.remove('visible'); } });
+
+      document.getElementById('tcConfirm').addEventListener('click', function () {
+        tcOverlay.classList.remove('visible');
+        trainingBtn.disabled = true;
+        trainingBtn.textContent = 'Saving…';
+        var oldErr = document.getElementById('completeTrainingError');
+        if (oldErr) { oldErr.parentNode.removeChild(oldErr); }
+
+        google.script.run
+          .withSuccessHandler(function (trainedUsers) {
+            var textEl = document.getElementById('tuText');
+            if (textEl) {
+              textEl.textContent = trainedUsers;
+              textEl.classList.remove('tu-empty');
+            }
+            trainingBtn.textContent = '✓ Training recorded';
+            setTimeout(function () {
+              trainingBtn.classList.add('fading-out');
+              setTimeout(function () { trainingBtn.style.display = 'none'; }, 250);
+            }, 1200);
+          })
+          .withFailureHandler(function (err) {
+            trainingBtn.disabled = false;
+            trainingBtn.innerHTML = trainingLabel;
+            var msg = document.createElement('div');
+            msg.id = 'completeTrainingError';
+            msg.className = 'complete-training-error';
+            msg.textContent = err.message;
+            trainingBtn.parentNode.insertBefore(msg, trainingBtn.nextSibling);
+          })
+          .completeTraining(<?!= JSON.stringify(itemName) ?>);
+      });
+    })();
+
+    var LAST_NAME_KEY = 'labCheckoutLastName';
+    var itemName = <?!= JSON.stringify(itemName) ?>;
+    var issueNotesField = document.getElementById('issueNotes');
+    var reportIssueBtn = document.getElementById('reportIssueBtn');
+    var gif = document.getElementById('issueGif');
+    var nameField = document.getElementById('name');
+    var nameLabel = document.getElementById('nameLabel');
+    var GIPHY_API_KEY = 'YOUR_GIPHY_API_KEY';
+    var revealed = false;
+
+    (function setDefaultName_() {
+      var matchedNameField = document.getElementById('matchedName');
+      var matchedName = matchedNameField ? matchedNameField.value : '';
+      var candidateName = matchedName || localStorage.getItem(LAST_NAME_KEY) || '';
+
+      if (candidateName) {
+        for (var i = 0; i < nameField.options.length; i++) {
+          if (nameField.options[i].value === candidateName) {
+            nameField.value = candidateName;
+            break;
+          }
+        }
+      }
+    })();
+
+    function setIssueBtn_(label) {
+      reportIssueBtn.innerHTML = '';
+      reportIssueBtn.appendChild(document.createTextNode(label));
+      var em = document.createElement('span');
+      em.className = 'btn-emoji';
+      em.textContent = '🚩';
+      reportIssueBtn.appendChild(em);
+    }
+
+    function updateSubmitState_() {
+      if (revealed) {
+        var name = nameField.value.trim();
+        reportIssueBtn.disabled = !name || issueNotesField.value.trim() === '';
+      }
+    }
+
+    issueNotesField.addEventListener('input', updateSubmitState_);
+    nameField.addEventListener('change', updateSubmitState_);
+
+    reportIssueBtn.addEventListener('click', function () {
+      if (!revealed) {
+        revealed = true;
+        nameLabel.style.display = 'block';
+        nameField.style.display = 'block';
+        issueNotesField.style.display = 'block';
+        gif.style.display = 'block';
+        setIssueBtn_('Submit Issue');
+        updateSubmitState_();
+
+        fetch('https://api.giphy.com/v1/gifs/search?api_key=' + GIPHY_API_KEY + '&q=animal+surprise&limit=8&rating=g')
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data && data.data && data.data.length > 0) {
+              var pick = data.data[Math.floor(Math.random() * data.data.length)];
+              gif.src = pick.images.fixed_height.url;
+            }
+          })
+          .catch(function () { gif.style.display = 'none'; });
+        return;
+      }
+
+      var btn = reportIssueBtn;
+      var name = nameField.value.trim();
+      btn.disabled = true;
+      setIssueBtn_('Submitting…');
+
+      google.script.run
+        .withSuccessHandler(function (msg) {
+          if (name) {
+            localStorage.setItem(LAST_NAME_KEY, name);
+          }
+          var section = document.getElementById('issueSection');
+          section.classList.add('fading-out');
+          setTimeout(function () {
+            section.style.display = 'none';
+          }, 250);
+          showResult_(msg);
+        })
+        .withFailureHandler(function (err) {
+          btn.disabled = false;
+          setIssueBtn_('Submit Issue');
+          alert('Error: ' + err.message);
+        })
+        .reportIssueOnly(itemName, name, issueNotesField.value);
+    });
+
+    function showResult_(message) {
+      var result = document.getElementById('result');
+      var icon = document.getElementById('resultIcon');
+      var text = document.getElementById('resultText');
+
+      result.className = 'visible';
+      text.textContent = message;
+      icon.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"></polyline></svg>';
+
+      void result.offsetWidth;
+      requestAnimationFrame(function () {
+        result.classList.add('shown');
+      });
+    }
+  </script>
+</body>
+</html>

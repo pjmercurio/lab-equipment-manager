@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html><head><meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #e9e5db; margin: 0; padding: 24px 12px; color: #1a1a1a; }
+  .grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+  .phone { width: 350px; background: #f6f3ec; border-radius: 14px; padding: 24px 20px; box-sizing: border-box; box-shadow: 0 1px 6px rgba(0,0,0,.15); }
+  .tag { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+  h1 { margin: 0 0 14px; font-size: 26px; }
+  .btn { display: block; text-align: center; background: #2563eb; color: #fff; border-radius: 999px; padding: 14px; font-size: 15px; font-weight: 600; margin-top: 12px; }
+  .emoji { margin-left: 8px; font-size: 1.2em; vertical-align: -0.05em; }
+  .rows { margin-bottom: 20px; font-size: 14px; }
+  .row { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid #e4dfd2; }
+  .row:last-child { border-bottom: 1px solid #e4dfd2; }
+  .ico { width: 20px; text-align: center; flex-shrink: 0; }
+  .k { color: #777; min-width: 92px; flex-shrink: 0; }
+  .v { font-weight: 600; flex: 1; line-height: 1.4; }
+
+  /* E: small outlined pill, far right of row */
+  .addE { align-self: flex-start; flex-shrink: 0; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 999px; padding: 2px 10px; font-size: 12.5px; font-weight: 700; }
+
+  /* F: small filled pill under the list, left aligned */
+  .addF { display: inline-block; margin-top: 8px; background: #2563eb; color: #fff; border-radius: 999px; padding: 4px 14px; font-size: 13px; font-weight: 700; }
+
+  /* G: tucked under the "Trained users" label */
+  .addG { display: inline-block; margin-top: 6px; background: #e8eefc; color: #1e40af; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
+
+  /* H: full-width dashed button under list */
+  .addH { display: block; margin-top: 10px; text-align: center; border: 1.5px dashed #2563eb; color: #2563eb; border-radius: 10px; padding: 7px; font-size: 13px; font-weight: 700; }
+</style></head>
+<body><div class="grid">
+  <div class="phone">
+    <div class="tag">E · Outlined pill, far right</div>
+    <h1>Biosafety Cabinet (Hood)</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">🎓</span><span class="k">Trained users</span><span class="v">Akshay Deivanayagam, Brenna Bell, Camilla Rinaldi, Duvaugn Pryce, Kai Sano-Giles</span><span class="addE">+ Add</span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+  </div>
+  <div class="phone">
+    <div class="tag">E · Outlined pill, far right · 1 person</div>
+    <h1>Biosafety Cabinet (Hood)</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">🎓</span><span class="k">Trained users</span><span class="v">Paul Mercurio</span><span class="addE">+ Add</span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+  </div>
+  <div class="phone">
+    <div class="tag">F · Filled pill under list</div>
+    <h1>Biosafety Cabinet (Hood)</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">🎓</span><span class="k">Trained users</span><span class="v">Akshay Deivanayagam, Brenna Bell, Camilla Rinaldi, Duvaugn Pryce, Kai Sano-Giles<br><span class="addF">+ Add</span></span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+  </div>
+  <div class="phone">
+    <div class="tag">F · Filled pill under list · 1 person</div>
+    <h1>Biosafety Cabinet (Hood)</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">🎓</span><span class="k">Trained users</span><span class="v">Paul Mercurio<br><span class="addF">+ Add</span></span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+  </div>
+  <div class="phone">
+    <div class="tag">G · Tucked under the label</div>
+    <h1>Biosafety Cabinet (Hood)</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">🎓</span><span class="k">Trained users<br><span class="addG">+ Add</span></span><span class="v">Akshay Deivanayagam, Brenna Bell, Camilla Rinaldi, Duvaugn Pryce, Kai Sano-Giles</span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+  </div>
+  <div class="phone">
+    <div class="tag">G · Tucked under the label · 1 person</div>
+    <h1>Biosafety Cabinet (Hood)</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">🎓</span><span class="k">Trained users<br><span class="addG">+ Add</span></span><span class="v">Paul Mercurio</span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+  </div>
+  <div class="phone">
+    <div class="tag">H · Full-width dashed button</div>
+    <h1>Biosafety Cabinet (Hood)</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">🎓</span><span class="k">Trained users</span><span class="v">Akshay Deivanayagam, Brenna Bell, Camilla Rinaldi, Duvaugn Pryce, Kai Sano-Giles<span class="addH">+ Add</span></span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+  </div>
+  <div class="phone">
+    <div class="tag">H · Full-width dashed button · 1 person</div>
+    <h1>Biosafety Cabinet (Hood)</h1>
+    <div class="rows">
+      <div class="row"><span class="ico">👤</span><span class="k">Contact</span><span class="v">Maria Lopez</span></div>
+      <div class="row"><span class="ico">🕒</span><span class="k">Last used by</span><span class="v">Paul Mercurio</span></div>
+      <div class="row"><span class="ico">🎓</span><span class="k">Trained users</span><span class="v">Paul Mercurio<span class="addH">+ Add</span></span></div>
+    </div>
+    <div class="btn">View SOP<span class="emoji">📋</span></div>
+  </div>
+</div></body></html>
